@@ -8,8 +8,8 @@ const startBtn = document.getElementById('start-btn') as HTMLButtonElement | nul
 
 // Initialize BGEW board on demand (on Start click)
 const boot = () => {
-  const { title, version, canvas } = config;
-  const board = new Board(title, version, canvas.width, canvas.height, app, canvas.background);
+  const { title, version, canvas, physics } = config;
+  const board = new Board(title, version, canvas.width, canvas.height, app, canvas.background, undefined, physics.collisions);
   const mainStep = new MainStep(board);
   board.step = mainStep;
   board.addSteps([mainStep]);

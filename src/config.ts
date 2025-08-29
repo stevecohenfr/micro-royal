@@ -9,6 +9,9 @@ export type AppConfig = {
   net: {
     apiBase?: string;
   };
+  physics: {
+    collisions: boolean;
+  };
 };
 
 const parseNumber = (v: string | undefined, fallback: number) => {
@@ -27,7 +30,9 @@ export const config: AppConfig = {
   net: {
     apiBase: import.meta.env.VITE_API_BASE,
   },
+  physics: {
+    collisions: (import.meta.env.VITE_ENABLE_COLLISIONS || 'true') !== 'false',
+  },
 };
 
 export { parseNumber };
-
