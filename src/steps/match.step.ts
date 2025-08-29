@@ -24,6 +24,11 @@ export class MatchStep extends GameStep {
   private bullets: Bullet[] = [];
   private lastShot = 0;
   private sfx: { shoot?: string; hit?: string; death?: string } = {};
+  // Zone state
+  private zoneRadius!: number;
+  private zonePhase = 0;
+  private zonePhaseTime = 0;
+  private nextShrinkAt = 0;
 
   constructor(board: Board) {
     super(board);
@@ -52,6 +57,12 @@ export class MatchStep extends GameStep {
     for (let i = 0; i < 8; i++) rect(200 + i * 180, 600, 100, 30);
     for (let i = 0; i < 6; i++) rect(1000, 300 + i * 200, 30, 120);
     rect(1600, 1600, 150, 150);
+
+    // Zone init
+    this.zoneRadius = config.zone.initialRadius;
+    this.zonePhase = 0;
+    this.zonePhaseTime = 0;
+    this.nextShrinkAt = performance.now() + 3000; // 3s countdown before first shrink
 
     // Sounds
     const [shoot, hit, death] = await Promise.all([
@@ -110,6 +121,42 @@ export class MatchStep extends GameStep {
       else this.board.removeEntity(b.body);
     }
     this.bullets = alive;
+
+    // Zone shrink logic
+    const now = performance.now();
+    if (this.zonePhase < config.zone.plan.length) {
+      if (now >= this.nextShrinkAt) {
+        // progress current shrink
+        const target = config.zone.plan[this.zonePhase];
+        const dur = target.durationMs;
+        this.zonePhaseTime += delta;
+        const startR = this.zonePhase === 0 ? config.zone.initialRadius : config.zone.plan[this.zonePhase - 1].radius;
+        const t = Math.min(1, this.zonePhaseTime / dur);
+        this.zoneRadius = startR + (target.radius - startR) * t;
+        if (t >= 1) {
+          // Move to next phase with small pause
+          this.zonePhase += 1;
+          this.zonePhaseTime = 0;
+          this.nextShrinkAt = now + 2000; // 2s pause before next shrink
+        }
+      }
+    }
+
+    // Zone damage if outside circle (tick-based)
+    if (!('_zoneTick' in (this as any))) {
+      (this as any)._zoneTick = now;
+    }
+    const lastTick: number = (this as any)._zoneTick as number;
+    if (now - lastTick >= config.zone.tickMs) {
+      (this as any)._zoneTick = now;
+      const p = this.player.body;
+      const cx = p.x + p.width / 2;
+      const cy = p.y + p.height / 2;
+      const dx = cx - config.zone.center.x;
+      const dy = cy - config.zone.center.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist > this.zoneRadius) this.applyDamage(config.zone.tickDamage);
+    }
   }
 
   draw(): void {
@@ -120,6 +167,30 @@ export class MatchStep extends GameStep {
     ctx.font = '14px system-ui, sans-serif';
     ctx.fillText(`${this.player.name}  HP: ${this.player.hp}`, 10, 20);
     ctx.fillText(`Ammo: ∞  DMG: ${config.balance.projectileDamage}`, 10, 38);
+    // Zone HUD: radius + countdown
+    const now = performance.now();
+    if (this.zonePhase < config.zone.plan.length) {
+      const secs = Math.max(0, Math.ceil((this.nextShrinkAt - now) / 1000));
+      if (secs > 0) ctx.fillText(`Shrink in: ${secs}s`, 10, 56);
+      else ctx.fillText(`Shrinking…`, 10, 56);
+    } else {
+      ctx.fillText(`Final zone`, 10, 56);
+    }
+    ctx.restore();
+
+    // Draw zone circle
+    ctx.save();
+    ctx.strokeStyle = '#77e0ff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(
+      config.zone.center.x - this.camera.x,
+      config.zone.center.y - this.camera.y,
+      this.zoneRadius,
+      0,
+      Math.PI * 2,
+    );
+    ctx.stroke();
     ctx.restore();
   }
 
@@ -161,4 +232,3 @@ export class MatchStep extends GameStep {
     }
   }
 }
-
