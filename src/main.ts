@@ -1,5 +1,6 @@
 import { Board } from '@fuwu-yuan/bgew';
 import { MainStep } from './steps/main.step';
+import { config } from './config';
 
 const app = document.getElementById('app') as HTMLDivElement;
 const startOverlay = document.getElementById('start-overlay') as HTMLDivElement | null;
@@ -7,7 +8,8 @@ const startBtn = document.getElementById('start-btn') as HTMLButtonElement | nul
 
 // Initialize BGEW board on demand (on Start click)
 const boot = () => {
-  const board = new Board('Micro Royal', '0.0.1', 960, 540, app, '#181824');
+  const { title, version, canvas } = config;
+  const board = new Board(title, version, canvas.width, canvas.height, app, canvas.background);
   const mainStep = new MainStep(board);
   board.step = mainStep;
   board.addSteps([mainStep]);
