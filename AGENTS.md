@@ -1,44 +1,40 @@
-# Agent Guidelines – Micro Royal
+# Repository Guidelines
 
-## Context
-- Repo cible : https://github.com/fuwu-yuan/micro-royal
-- Repo moteur (lecture seule) : https://github.com/fuwu-yuan/bgew
-- Objectif : développer le jeu "Micro Royal" en suivant la roadmap située dans `docs/ROADMAP.md`.
+## Project Structure & Modules
+- Root docs: `docs/` (ROADMAP, GAME/NET specs, TECH_DECISIONS).
+- Source (planned per roadmap): `src/` for game code, `assets/` for sprites/audio, `tests/` for unit tests.
+- Keep modules small and focused: `src/core/*` (engine integration), `src/game/*` (states/entities), `src/net/*` (network wrapper).
 
-## Rules
-1. **Toujours travailler dans le repo cible** (`micro-royal`).
-2. **Ne jamais modifier le repo moteur** (`bgew`). Il est uniquement en lecture pour référence.
-3. Chaque tâche = une PR unique.
-   - Créer une branche `feature/pr-XX-*`.
-   - Committer les changements.
-   - Pousser sur le remote `origin`.
-   - Ouvrir une Pull Request vers `main`.
+## Build, Test, and Development
+- Install: `npm ci` — install exact dependencies.
+- Dev server: `npm run dev` — start local hot-reload (Vite/Parcel).
+- Build: `npm run build` — production build of the client.
+- Lint/Format: `npm run lint` / `npm run format` — static checks and formatting.
+- Tests: `npm test` — run unit tests (Vitest/Jest). `npm run test:watch` for TDD.
+Notes: scripts land in PR-01..PR-05; use the names above when adding them.
 
-## Deliverables par PR
-- Diff exact (`git diff`).
-- Tests ou scripts garantissant CI verte.
-- Titre et description de PR (résumé clair, risques, perf, étapes suivantes).
-- Mise à jour de la doc si nécessaire (`README.md`, `ROADMAP.md`, `TECH_DECISIONS.md`).
+## Coding Style & Naming
+- Language: TypeScript. Indent 2 spaces; prefer const; no unused vars.
+- Naming: camelCase (vars/functions), PascalCase (types/classes), kebab-case (filenames), SCREAMING_SNAKE_CASE (env).
+- Imports: absolute from `src/` when configured; otherwise relative kept shallow.
+- Tools: ESLint + Prettier (configure in PR-02). Run before committing.
 
-## Constraints
-- Durée max par PR ≈ 15 min de travail.
-- Si une tâche dépasse, fractionner en PR-XXa, PR-XXb… et mettre à jour `ROADMAP.md`.
-- Ne jamais proposer une PR sans diff. Si aucun changement détecté, ajouter un commit trivial (ex: mise à jour de `README.md` ou `ROADMAP.md`) pour déclencher la PR.
+## Testing Guidelines
+- Framework: Vitest (preferred) or Jest (PR-03).
+- Location: `tests/**/*` or colocated `*.test.ts` near source.
+- Conventions: name tests after behavior, e.g. `player.move.test.ts`.
+- Expectations: cover pure logic (validators, reducers, math, interpolation). Add at least one trivial test per PR touching logic.
 
-## Git / Remote
-- Toujours vérifier le remote : `git remote -v` doit montrer  
-  `origin https://github.com/fuwu-yuan/micro-royal.git`
-- Si aucun remote, configurer :  
-  `git remote add origin https://github.com/fuwu-yuan/micro-royal.git`
-- Utiliser un Personal Access Token (PAT) ou l’auth du connecteur pour `git push`.
+## Commit & Pull Requests
+- Branches: `feature/pr-XX-*` matching the item in `docs/ROADMAP.md`.
+- Commits: concise imperative subject. Prefer Conventional Commits, e.g. `feat(core): init game loop (PR-10)`.
+- PRs into `main`: include summary, scope, risks, testing notes, and screenshots/GIFs for UI.
+- Keep PRs < ~15 minutes of work; split into `PR-XXa`, `PR-XXb` if larger. Update ROADMAP when you split.
+- Remote: ensure `origin` points to GitHub (e.g., `git@github.com:stevecohenfr/micro-royal.git`).
 
-## Workflow attendu
-1. Lire la tâche active dans `ROADMAP.md`.
-2. Créer/mettre à jour la branche `feature/pr-XX`.
-3. Implémenter la tâche.
-4. Commit + push.
-5. Ouvrir une PR vers `main` avec le titre/description formatés.
-6. Signaler la PR créée avec son lien.
+## Security & Configuration
+- Never commit secrets. Use `.env.local` (gitignored). Document required env in README.
+- Keep third‑party assets licensed and credited (see future `ASSET_CHECKLIST.md`).
 
----
-
+## Agent-Specific Notes
+- Work only in this repo (do not modify BGEW). One task = one PR with a real diff and green CI. Update `README.md`/`ROADMAP.md`/`TECH_DECISIONS.md` when relevant.
