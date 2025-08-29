@@ -1,6 +1,7 @@
 import { Board, Entities, GameStep, Timer } from '@fuwu-yuan/bgew';
 import { InputManager } from '@/core/input';
 import { config } from '@/config';
+import { createBeepWavDataUri } from '@/utils/audio';
 
 export class MainStep extends GameStep {
   name = 'main';
@@ -49,6 +50,21 @@ export class MainStep extends GameStep {
     this.input = new InputManager({
       onKeyboardEvent: (ev, cb) => this.board.onKeyboardEvent(ev, cb),
       onMouseEvent: (ev, cb) => this.board.onMouseEvent(ev, cb),
+    });
+
+    // Register and play simple sounds (BGM loop + SFX on click)
+    (async () => {
+      const [bgm, sfx] = await Promise.all([
+        createBeepWavDataUri(800, 220),
+        createBeepWavDataUri(150, 880),
+      ]);
+      this.board.registerSound('bgm/loop', bgm, true, 0.1);
+      this.board.registerSound('sfx/beep', sfx, false, 0.5);
+      this.board.playSound('bgm/loop', true, 0.1);
+    })();
+
+    this.board.onMouseEvent('click', () => {
+      this.board.playSound('sfx/beep', false, 0.6);
     });
   }
 
