@@ -1,5 +1,7 @@
 import { Board } from '@fuwu-yuan/bgew';
-import { MainStep } from './steps/main.step';
+import { LobbyStep } from './steps/lobby.step';
+import { MatchStep } from './steps/match.step';
+import { EndStep } from './steps/end.step';
 import { config } from './config';
 
 const app = document.getElementById('app') as HTMLDivElement;
@@ -10,9 +12,11 @@ const startBtn = document.getElementById('start-btn') as HTMLButtonElement | nul
 const boot = () => {
   const { title, version, canvas, physics } = config;
   const board = new Board(title, version, canvas.width, canvas.height, app, canvas.background, undefined, physics.collisions);
-  const mainStep = new MainStep(board);
-  board.step = mainStep;
-  board.addSteps([mainStep]);
+  const lobby = new LobbyStep(board);
+  const match = new MatchStep(board);
+  const end = new EndStep(board);
+  board.addSteps([lobby, match, end]);
+  board.step = lobby;
   board.start();
 };
 

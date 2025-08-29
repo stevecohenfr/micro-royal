@@ -12,6 +12,13 @@ export type AppConfig = {
   physics: {
     collisions: boolean;
   };
+  balance: {
+    playerMaxHp: number;
+    playerSpeed: number; // px/s
+    projectileSpeed: number; // px/s
+    fireCooldownMs: number;
+    projectileDamage: number;
+  };
 };
 
 const parseNumber = (v: string | undefined, fallback: number) => {
@@ -32,6 +39,13 @@ export const config: AppConfig = {
   },
   physics: {
     collisions: (import.meta.env.VITE_ENABLE_COLLISIONS || 'true') !== 'false',
+  },
+  balance: {
+    playerMaxHp: parseNumber(import.meta.env.VITE_PLAYER_MAX_HP, 100),
+    playerSpeed: parseNumber(import.meta.env.VITE_PLAYER_SPEED, 200),
+    projectileSpeed: parseNumber(import.meta.env.VITE_PROJECTILE_SPEED, 600),
+    fireCooldownMs: parseNumber(import.meta.env.VITE_FIRE_COOLDOWN_MS, 250),
+    projectileDamage: parseNumber(import.meta.env.VITE_PROJECTILE_DAMAGE, 10),
   },
 };
 
